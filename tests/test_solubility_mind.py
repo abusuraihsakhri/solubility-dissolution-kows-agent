@@ -6,7 +6,7 @@ import pytest
 from solubility_mind.models import FrontierPayload, ExecutionStatus
 from solubility_mind.engine import FrontierDomainEngine
 from solubility_mind.agents import IntrinsicSolubilityAgent, BCSClassDeterminerAgent, DissolutionRatePredictorAgent, SolubilityCoordinator
-from solubility_mind.cli import main
+from solubility_mind.cli import main, _resolve_safe_path
 
 
 def test_sub_agents():
@@ -42,3 +42,41 @@ def test_coordinator():
 def test_cli():
     assert main(["audit", "--task-id", "CLI-01"]) == 0
     assert main(["chat", "What", "is", "the", "system", "status?"]) == 0
+
+
+def test_sm_path_traversal_protection():
+    """Batch CLI must reject paths that escape the working directory."""
+    with pytest.raises(ValueError, match="Path traversal blocked"):
+        _resolve_safe_path("../../../etc/passwd")
+
+
+def test_sm_batch_cli_with_valid_csv():
+    """Batch CLI processes a valid CSV and produces output."""
+    work_dir = Path(__file__).parent / "_test_sm_tmp"
+    work_dir.mkdir(exist_ok=True)
+    try:
+        input_csv = work_dir / "input.csv"
+        input_csv.write_text(
+            "task_id,target_identifier,primary_metric,secondary_metric,is_critical_flag,status_descriptor\n"
+            "TASK-SM1,TARGET-SM1,12.0,4.0,False,NOMINAL\n",
+            encoding="utf-8",
+        )
+        output_csv = work_dir / "output.csv"
+        result = main(["batch", "-i", str(input_csv), "-o", str(output_csv)])
+        assert result == 0
+        assert output_csv.exists()
+        content = output_csv.read_text(encoding="utf-8")
+        assert "overall_status" in content
+    finally:
+        if output_csv.exists():
+            output_csv.unlink()
+        if input_csv.exists():
+            input_csv.unlink()
+        if work_dir.exists():
+            work_dir.rmdir()
+
+
+def test_sm_batch_cli_missing_input():
+    """Batch CLI returns non-zero exit code for missing input file."""
+    result = main(["batch", "-i", "nonexistent_file_12345.csv"])
+    assert result == 1

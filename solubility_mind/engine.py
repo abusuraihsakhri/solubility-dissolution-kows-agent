@@ -4,7 +4,7 @@ Domain: Computational Chemistry & AI Drug Discovery
 Standard: FDA / WHO Biopharmaceutics Classification (BCS)
 """
 import math
-from typing import Dict, Any, List, Optional
+from typing import Any, Dict, Optional
 from .models import FrontierPayload, AgentTelemetryAlert, ExecutionStatus
 
 

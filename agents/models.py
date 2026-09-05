@@ -5,7 +5,7 @@ Standard: wwPDB / IUPAC / OpenSMILES / ISAC Standards
 """
 import datetime
 from enum import Enum
-from typing import Dict, Any, List, Optional
+from typing import Any, Dict, List
 from pydantic import BaseModel, Field
 
 

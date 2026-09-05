@@ -68,10 +68,19 @@ python cli.py --task-id <value> --target <value> --primary <value> --secondary <
 ## 🛡️ Security & Enterprise Architecture
 
 * **Zero-PHI Outbound Interceptor:** Active AST and regex inspection blocking SSNs, MRNs, phone numbers, and patient identifiers.
-* **Tamper-Evident HMAC-SHA256 Audit Trail:** Chained, cryptographically signed logs for every evaluation and state transition.
+* **Tamper-Evident HMAC-SHA256 Audit Trail:** Chained, cryptographically signed logs for every evaluation and state transition. Set `AUDIT_SECRET_KEY` env var for persistent signatures across restarts; a secure random key is generated automatically if unset.
+* **Path Traversal Protection:** All batch CLI file I/O is restricted to the working directory, preventing directory traversal attacks.
+* **Robust Error Handling:** Batch processing gracefully handles malformed CSV rows, missing files, and invalid numeric data without crashing.
 * **Air-Gapped LLM Reasoning Adapter:** Agnostic integration for local Ollama instances (`llama3`, `mistral`), Claude 3.5 Sonnet, GPT-4o, and deterministic test mocks.
 * **Active Learning Bayesian Calibration:** Dynamic tracker updating worker reliability weights and monitoring Brier calibration drift.
 * **FastAPI & Prometheus Telemetry:** Exposes OpenAPI 3.1 REST endpoints and operational Prometheus metrics (`/metrics`).
+
+### Environment Variables
+
+| Variable | Required | Default | Purpose |
+|:---------|:---------|:--------|:--------|
+| `AUDIT_SECRET_KEY` | No (recommended) | Random per-session | Secret key for HMAC-SHA256 audit signatures. Set for production to ensure signature consistency across restarts. |
+| `MODEL_PROVIDER` | No | `mock` | LLM provider: `mock`, `ollama`, `claude`, `openai` |
 
 ---
 

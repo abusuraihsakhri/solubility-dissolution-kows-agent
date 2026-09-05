@@ -8,3 +8,6 @@ output.csv
 dist/
 build/
 *.egg-info/
+_test_tmp/
+_test_sm_tmp/
+.env

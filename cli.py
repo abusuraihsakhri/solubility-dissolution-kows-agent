@@ -3,13 +3,30 @@ Command Line Interface for Solubility Dissolution Kows Agent.
 """
 import argparse
 import csv
-import json
+import os
 import sys
+from pathlib import Path
 from agents.models import SystemTaskPayload
 from agents.supervisor import SystemSupervisor
 from agents.base import AuditLogger
 
 supervisor = SystemSupervisor(model_provider="mock")
+
+
+def _resolve_safe_path(path_str: str, must_exist: bool = False) -> Path:
+    """Resolve a user-supplied path, preventing directory traversal outside CWD."""
+    base = Path.cwd().resolve()
+    target = Path(path_str).resolve()
+    if must_exist and not target.exists():
+        raise FileNotFoundError(f"Input file not found: {path_str}")
+    try:
+        target.relative_to(base)
+    except ValueError:
+        raise ValueError(
+            f"Path traversal blocked: '{path_str}' resolves outside the working directory. "
+            f"Only paths within '{base}' are permitted."
+        )
+    return target
 
 
 def main(argv=None):
@@ -80,22 +97,40 @@ def main(argv=None):
         return 0
 
     if args.command == "batch":
-        with open(args.input, mode="r", encoding="utf-8-sig") as f:
-            reader = csv.DictReader(f)
-            fieldnames = list(reader.fieldnames or [])
-            rows = list(reader)
+        try:
+            in_path = _resolve_safe_path(args.input, must_exist=True)
+            out_path = _resolve_safe_path(args.output, must_exist=False)
+        except (FileNotFoundError, ValueError) as e:
+            print(f"Error: {e}", file=sys.stderr)
+            return 1
+
+        try:
+            with open(in_path, mode="r", encoding="utf-8-sig") as f:
+                reader = csv.DictReader(f)
+                fieldnames = list(reader.fieldnames or [])
+                if not fieldnames:
+                    print("Error: CSV file is empty or has no header row.", file=sys.stderr)
+                    return 1
+                rows = list(reader)
+        except (csv.Error, OSError) as e:
+            print(f"Error reading input CSV: {e}", file=sys.stderr)
+            return 1
 
         out_fields = fieldnames + ["overall_urgency", "integrity_status", "total_alerts", "audit_hash"]
         out_rows = []
-        for r in rows:
-            payload = SystemTaskPayload(
-                task_id=r.get("task_id", "TASK-01"),
-                target_identifier=r.get("target_identifier", "TARGET-01"),
-                primary_metric=float(r.get("primary_metric", 15.0)),
-                secondary_metric=float(r.get("secondary_metric", 5.0)),
-                status_descriptor=r.get("status_descriptor", "NOMINAL"),
-                is_critical_flag=bool(r.get("is_critical_flag", False)),
-            )
+        for idx, r in enumerate(rows, start=1):
+            try:
+                payload = SystemTaskPayload(
+                    task_id=r.get("task_id", f"TASK-{idx:03d}"),
+                    target_identifier=r.get("target_identifier", f"TARGET-{idx:03d}"),
+                    primary_metric=float(r.get("primary_metric", 15.0) or 15.0),
+                    secondary_metric=float(r.get("secondary_metric", 5.0) or 5.0),
+                    status_descriptor=r.get("status_descriptor", "NOMINAL"),
+                    is_critical_flag=str(r.get("is_critical_flag", "")).lower() in ("true", "1", "yes"),
+                )
+            except (ValueError, TypeError) as e:
+                print(f"Warning: Skipping row {idx} due to invalid data: {e}", file=sys.stderr)
+                continue
             dossier = supervisor.process_task(payload)
             row_dict = dict(r)
             row_dict["overall_urgency"] = dossier.overall_urgency.value
@@ -104,10 +139,14 @@ def main(argv=None):
             row_dict["audit_hash"] = dossier.audit_hash
             out_rows.append(row_dict)
 
-        with open(args.output, mode="w", encoding="utf-8", newline="") as f:
-            writer = csv.DictWriter(f, fieldnames=out_fields)
-            writer.writeheader()
-            writer.writerows(out_rows)
+        try:
+            with open(out_path, mode="w", encoding="utf-8", newline="") as f:
+                writer = csv.DictWriter(f, fieldnames=out_fields)
+                writer.writeheader()
+                writer.writerows(out_rows)
+        except OSError as e:
+            print(f"Error writing output CSV: {e}", file=sys.stderr)
+            return 1
         print(f"Processed {len(out_rows)} records -> {args.output}")
         return 0
 
