@@ -48,3 +48,12 @@ def test_partition_and_noyes_whitney():
 def test_invalid_inputs(kwargs):
     with pytest.raises(ValueError):
         calculate(**kwargs)
+
+
+def test_extreme_numeric_inputs_are_not_silently_serialized_as_infinity():
+    with pytest.raises(ValueError, match="Dose number"):
+        calculate(1e-300, 1e300)
+    r = calculate(0.5, 100, octanol_concentration_mg_ml=1e300,
+                  water_concentration_mg_ml=1e-300)
+    assert math.isfinite(r["log_kow"])
+    assert r["log_kow"] == pytest.approx(600)

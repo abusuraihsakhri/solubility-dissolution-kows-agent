@@ -26,3 +26,10 @@ test("invalid data",()=>{
     assert.throws(()=>calculate({...b,...extra}));
   }
 });
+
+test("extreme partition ratios stay finite and overflowed dose numbers are rejected",()=>{
+  assert.throws(()=>calculate({intrinsic_solubility_mg_ml:1e-300,dose_mg:1e300}));
+  const p=calculate({intrinsic_solubility_mg_ml:0.5,dose_mg:100,
+    octanol_concentration_mg_ml:1e300,water_concentration_mg_ml:1e-300});
+  approx(p.log_kow,600);
+});

@@ -32,6 +32,7 @@ export function calculate({
   });
   const minimum_solubility_mg_ml = Math.min(...ph_profile.map(x => x.solubility_mg_ml));
   const dose_number = dose / (250 * minimum_solubility_mg_ml);
+  if (!Number.isFinite(dose_number)) throw new Error("Dose number is outside the numeric range");
   const high = dose_number <= 1;
   const bcs_screen = permeability === "unknown" ? null
     : permeability === "high" ? (high ? "I" : "II") : (high ? "III" : "IV");
@@ -40,7 +41,7 @@ export function calculate({
     if (co === null || cw === null) throw new Error("Both octanol and water concentrations are required");
     check("Octanol concentration", co, {positive:true});
     check("Water concentration", cw, {positive:true});
-    log_kow = Math.log10(co / cw);
+    log_kow = Math.log10(co) - Math.log10(cw);
   }
   let dissolution_rate_mg_s = null;
   if ([d,area,layer,bulk].some(x => x !== null)) {

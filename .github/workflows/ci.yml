@@ -1,4 +1,4 @@
-name: Solubility Dissolution Kows Engine CI/CD & Security Verification
+name: Python and browser regression tests
 
 on:
   push:
@@ -43,5 +43,6 @@ jobs:
         from agents.base import PHIGuard, AuditLogger
         import pytest
         assert AuditLogger.verify_integrity() is True
-        print('Security & Zero-PHI Audit Passed!')
+        PHIGuard.assert_no_phi('sample KEY-001')
+        print('Audit smoke check passed')
         "

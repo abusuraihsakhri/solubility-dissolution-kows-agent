@@ -61,6 +61,8 @@ def calculate(
         profile.append({"ph": ph, "solubility_mg_ml": s})
     minimum_s = min(x["solubility_mg_ml"] for x in profile)
     dose_number = dose / (250 * minimum_s)
+    if not math.isfinite(dose_number):
+        raise ValueError("Dose number is outside the numeric range")
     high_solubility = dose_number <= 1
     bcs = None
     if permeability != "unknown":
@@ -74,7 +76,7 @@ def calculate(
     if all(x is not None for x in optional_partition):
         co = _number("octanol_concentration_mg_ml", optional_partition[0], positive=True)
         cw = _number("water_concentration_mg_ml", optional_partition[1], positive=True)
-        log_kow = math.log10(co / cw)
+        log_kow = math.log10(co) - math.log10(cw)
 
     optional_dissolution = (diffusion_cm2_s, surface_area_cm2, diffusion_layer_cm,
                             bulk_concentration_mg_ml)
