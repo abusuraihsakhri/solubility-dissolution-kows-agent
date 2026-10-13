@@ -10,6 +10,7 @@ import hmac
 import hashlib
 import secrets
 import logging
+from copy import deepcopy
 from typing import Dict, Any, List, Optional
 from datetime import datetime, timezone
 
@@ -85,17 +86,28 @@ class AuditTrail:
             "current_hash": signature,
         }
         self.logs.append(entry)
-        return entry
+        return entry.copy()
 
     def verify_integrity(self) -> bool:
-        for i, entry in enumerate(self.logs):
-            prev = self.logs[i-1]["current_hash"] if i > 0 else "GENESIS_BLOCK_0000000000000000"
-            if entry["prev_hash"] != prev:
+        prev = "GENESIS_BLOCK_0000000000000000"
+        for entry in self.logs:
+            try:
+                if entry["prev_hash"] != prev:
+                    return False
+                message = "|".join(str(entry[k]) for k in (
+                    "audit_id", "timestamp", "actor", "actor_tier",
+                    "event_type", "payload_hash", "prev_hash"
+                ))
+                expected = hmac.new(self.secret_key, message.encode("utf-8"), hashlib.sha256).hexdigest()
+                if not hmac.compare_digest(expected, entry["current_hash"]):
+                    return False
+                prev = entry["current_hash"]
+            except (KeyError, TypeError, ValueError):
                 return False
         return True
 
     def get_trail(self) -> List[Dict[str, Any]]:
-        return self.logs
+        return deepcopy(self.logs)
 
 
 GLOBAL_AUDIT = AuditTrail()

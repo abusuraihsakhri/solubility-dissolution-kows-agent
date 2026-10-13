@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'unsafe-inline'; connect-src 'none'; object-src 'none'; base-uri 'none'">
+<meta name="description" content="Local physicochemical screening for pH solubility, dose number, provisional BCS quadrant, log Kow and dissolution.">
+<title>Solubility &amp; dissolution | Screening calculator</title>
+<style>
+:root{color-scheme:dark;--bg:#0c1220;--panel:#152035;--line:#394d69;--text:#f1f5f9;--muted:#c1cedf;--accent:#93c5fd}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font:16px/1.5 system-ui,-apple-system,sans-serif}
+main{max-width:1170px;margin:auto;padding:2rem 1.25rem 4rem}
+header{margin-bottom:1.8rem}
+h1{font-size:clamp(1.7rem,3vw,2.4rem);margin:0 0 .4rem}
+h2{font-size:1.2rem;margin:0 0 1rem}
+p{margin:.5rem 0 1rem}
+small,.muted{color:var(--muted)}
+.tag{display:inline-block;border:1px solid var(--line);border-radius:2rem;padding:.2rem .7rem;color:#86efac;font-size:.8rem;margin-bottom:.9rem}
+.layout{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);gap:1.2rem;align-items:start}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:1.4rem;min-width:0}
+.fields{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:1rem}
+label{display:block;font-size:.9rem;font-weight:650;margin-bottom:.3rem}
+input,select{display:block;width:100%;background:#0c1728;color:var(--text);border:1px solid #607188;padding:.65rem;border-radius:7px;font-size:1rem}
+input:focus-visible,select:focus-visible,button:focus-visible,a:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.field small{display:block;font-size:.77rem;margin-top:.3rem}
+h3{font-size:1rem;margin:1.5rem 0 .8rem;border-top:1px solid var(--line);padding-top:1rem}
+button{background:#2563eb;border:0;color:white;padding:.8rem 1rem;border-radius:8px;cursor:pointer;font-weight:700;font-size:1rem}
+button:hover{background:#1d4ed8}
+button:disabled{opacity:.55;cursor:not-allowed}
+.actions{display:flex;flex-wrap:wrap;gap:.7rem;margin-top:1.3rem}
+.secondary{background:#334155}.secondary:hover{background:#475569}
+.metric{border-bottom:1px solid var(--line);padding:.75rem 0}
+.metric span{display:block;color:var(--muted);font-size:.84rem}
+.metric strong{font-size:1.05rem;overflow-wrap:anywhere}
+table{border-collapse:collapse;width:100%;font-variant-numeric:tabular-nums}
+th,td{padding:.6rem;text-align:left;border-bottom:1px solid var(--line)}
+th{color:var(--muted)}
+.notice{margin:0 0 1.2rem;padding:.95rem 1.1rem;border-left:3px solid #fbbf24;background:#24222a}
+.error{color:#fecaca;background:#42202a;border:1px solid #ef4444;border-radius:8px;padding:.9rem;margin-top:1rem}
+.result-note{margin-top:1rem;color:var(--muted);font-size:.87rem}
+a{color:var(--accent)}
+footer{margin-top:1.5rem;color:var(--muted);font-size:.86rem}
+[hidden]{display:none!important}
+@media(max-width:850px){.layout{grid-template-columns:1fr}main{padding-top:1.2rem}}
+@media(max-width:500px){.fields{grid-template-columns:1fr}.panel{padding:1rem}}
+</style>
+</head>
+<body>
+<main>
+<header><div class="tag">Local calculation · No server required</div>
+<h1>Solubility &amp; dissolution screening</h1>
+<p class="muted">Theoretical pH-dependent solubility, dose number, provisional BCS quadrant, octanol/water partitioning, and Noyes–Whitney dissolution rate.</p></header>
+<p class="notice"><strong>Exploratory research only.</strong> The pH profile is a simplified theoretical monoprotic model, not experimental solubility. Permeability must be independently assessed; log K<sub>ow</sub> does not establish it. Not suitable for clinical or regulatory decisions.</p>
+<div class="layout">
+<section class="panel" aria-labelledby="inputs-title">
+<h2 id="inputs-title">Inputs</h2>
+<p class="muted"><small>Illustrative values are prefilled. Replace with measured inputs and check the units.</small></p>
+<form id="calculator">
+<div class="fields">
+<div class="field"><label for="sol">Intrinsic solubility S₀ (mg/mL)</label><input id="sol" name="intrinsic_solubility_mg_ml" type="number" min="0" step="any" value="0.5" required></div>
+<div class="field"><label for="dose">Highest single dose (mg)</label><input id="dose" name="dose_mg" type="number" min="0" step="any" value="100" required></div>
+<div class="field"><label for="ion">Ionization model</label><select id="ion" name="ionization"><option value="neutral">Neutral</option><option value="acid">Monoprotic weak acid</option><option value="base">Monoprotic weak base</option></select></div>
+<div class="field" id="pka-group" hidden><label for="pka">pKa</label><input id="pka" name="pka" type="number" step="any" value="4.5"><small>Required for acids and bases</small></div>
+<div class="field"><label for="perm">Independent permeability evidence</label><select id="perm" name="permeability"><option value="unknown">Unknown / not assessed</option><option value="high">High (externally established)</option><option value="low">Low (externally established)</option></select></div>
+</div>
+<h3>Optional octanol/water concentration ratio</h3>
+<div class="fields">
+<div class="field"><label for="co">Octanol equilibrium concentration (mg/mL)</label><input id="co" name="octanol_concentration_mg_ml" type="number" min="0" step="any" placeholder="Optional"></div>
+<div class="field"><label for="cw">Water equilibrium concentration (mg/mL)</label><input id="cw" name="water_concentration_mg_ml" type="number" min="0" step="any" placeholder="Optional"></div>
+</div>
+<h3>Optional Noyes–Whitney rate</h3>
+<div class="fields">
+<div class="field"><label for="diff">Diffusion coefficient D (cm²/s)</label><input id="diff" name="diffusion_cm2_s" type="number" min="0" step="any" placeholder="Optional"></div>
+<div class="field"><label for="area">Surface area A (cm²)</label><input id="area" name="surface_area_cm2" type="number" min="0" step="any" placeholder="Optional"></div>
+<div class="field"><label for="layer">Diffusion-layer thickness h (cm)</label><input id="layer" name="diffusion_layer_cm" type="number" min="0" step="any" placeholder="Optional"></div>
+<div class="field"><label for="bulk">Bulk concentration C (mg/mL)</label><input id="bulk" name="bulk_concentration_mg_ml" type="number" min="0" step="any" placeholder="Optional"></div>
+<div class="field"><label for="cs">Saturation concentration Cₛ in dissolution medium (mg/mL)</label><input id="cs" name="saturation_concentration_mg_ml" type="number" min="0" step="any" placeholder="Optional"></div>
+</div>
+<div class="actions"><button type="submit">Calculate</button><button type="button" id="export" class="secondary" disabled>Export CSV</button></div>
+</form><div id="error" class="error" role="alert" hidden></div>
+</section>
+<section class="panel" aria-labelledby="outputs-title">
+<h2 id="outputs-title">Calculated results</h2>
+<div id="result" aria-live="polite" hidden>
+<div class="metric"><span>Solubility screen (250 mL)</span><strong id="solubility-result"></strong></div>
+<div class="metric"><span>Dose number</span><strong id="dose-result"></strong></div>
+<div class="metric"><span>Provisional BCS quadrant</span><strong id="bcs-result"></strong></div>
+<div class="metric"><span>Minimum modeled solubility</span><strong id="min-result"></strong></div>
+<div class="metric"><span>log₁₀(C<sub>octanol</sub>/C<sub>water</sub>)</span><strong id="kow-result"></strong></div>
+<div class="metric"><span>Dissolution rate (negative = net precipitation)</span><strong id="rate-result"></strong></div>
+<h3>Modeled pH profile</h3><table><thead><tr><th scope="col">pH</th><th scope="col">Solubility (mg/mL)</th></tr></thead><tbody id="ph-data"></tbody></table>
+<p class="result-note">S(pH) = S₀[1 + 10^(pH − pKa)] for a weak acid, or S₀[1 + 10^(pKa − pH)] for a weak base. Dissolution rate dM/dt = (DA/h)(Cₛ − C). Assumes ideal behavior and neglects salts, activity, crystallinity and temperature. The phase concentration ratio represents intrinsic log Kow only for the appropriate neutral-species partitioning experiment.</p>
+</div>
+<p id="empty" class="muted">Select Calculate to see results. No values have been computed yet.</p>
+</section>
+</div>
+<footer><p>Reference: <a href="https://database.ich.org/sites/default/files/M9_Guideline_Step4_2019_1116.pdf" rel="noopener noreferrer" target="_blank">ICH M9 biopharmaceutics classification guidance</a>. Regulatory assessment requires measured equilibrium solubility over the relevant pH range at 37 ± 1 °C and justified permeability evidence. Inputs are processed locally in this browser; this tool transmits none of them.</p></footer>
+</main>
+<script type="module" src="./app.mjs"></script>
+</body>
+</html>
