@@ -1,108 +1,73 @@
-# Solubility Dissolution Kows Agent
+# Solubility & Dissolution Screening Calculator
 
-> **Domain:** Computational Biology & AI Drug Discovery  
-> **Reference Guidelines & Standards:** `wwPDB, IUPAC & CLSI Computational Guidelines`
+A browser-based and Python physicochemical calculator for exploratory pharmaceutical research. The browser application runs locally without a backend, external models, or uploading inputs.
 
-<div align="center">
+## Capabilities
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
-![Python](https://img.shields.io/badge/Python-3.10%20%7C%203.11%20%7C%203.12-3776AB.svg?logo=python&logoColor=white)
-![FastAPI](https://img.shields.io/badge/FastAPI-0.111-009688.svg?logo=fastapi&logoColor=white)
-![Audit Trail](https://img.shields.io/badge/Audit-HMAC--SHA256_Tamper--Evident-brightgreen.svg)
-![Zero-PHI Guard](https://img.shields.io/badge/Guard-Zero--PHI_Outbound-blue.svg)
-![Docker](https://img.shields.io/badge/Docker-Ready-2496ED.svg?logo=docker&logoColor=white)
+- Idealized pH-dependent solubility at pH 1.2, 4.5, and 6.8 for monoprotic weak acids, weak bases, and neutral solutes.
+- Dose number from the highest single dose, 250 mL and minimum modeled solubility.
+- Provisional BCS quadrant I–IV only when independent high/low permeability evidence is supplied. Log Kow is never used to infer permeability.
+- Optional octanol/water distribution log ratio from measured equilibrium concentrations.
+- Optional instantaneous Noyes–Whitney dissolution rate from diffusion coefficient, area, boundary-layer thickness, and bulk concentration.
+- CSV export and equivalent Python calculations exposed through FastAPI.
+- The earlier generic task-audit APIs and CLIs remain available for compatibility, but their fixed thresholds are not physicochemical BCS criteria.
 
-</div>
+## Browser application
 
----
+Serve the repository root using:
 
-## 📖 What It Does
+    python -m http.server 8080
 
-**Solubility Dissolution Kows Agent** is an advanced analytical and computational platform implementing Intrinsic aqueous solubility & Biopharmaceutics Classification (BCS I-IV) agent.
+Then open http://localhost:8080/docs/ in a modern browser. The alternative top-level index.html redirects to the calculator. An HTTP server is recommended because some browsers restrict JavaScript modules on file:// URLs.
 
----
+Enter intrinsic solubility (mg/mL) and highest single dose (mg). Choose ionization and enter pKa for monoprotic weak acids/bases. Optional octanol/water and dissolution fields can be left empty or entered as complete groups. Select Calculate, then Export CSV.
 
-## ⚙️ Key Capabilities & Algorithmic Modules
+GitHub Pages can deploy the docs directory through the included GitHub Actions workflow when repository Pages settings use GitHub Actions as the source.
 
-- **Deterministic Calculation Engine**: Strict compliance with standard reference formulations and thresholds.
-- **Risk & Urgency Classification**: Multi-tier categorization with automated clinical/operational action recommendations.
-- **Validation & Guardrails**: Rigorous input bounds checking and anomaly detection.
+## Python / API
 
----
+Requires Python 3.9+. Install and test:
 
-## 💻 CLI Quickstart & Usage
+    python -m pip install -e . pytest
+    python -m pytest -q
+    node --test tests/test_browser.mjs
 
-### 1. Guided Interactive Mode
-```bash
-python cli.py
-```
+Run the FastAPI service with:
 
-### 2. Direct Parameterized Evaluation
-```bash
-python cli.py --task-id <value> --target <value> --primary <value> --secondary <value>
-```
+    python cli.py serve --host 127.0.0.1 --port 8000
 
-### Parameter Reference
-- `--task-id`: Specifies input measurement or parameter value.
-- `--target`: Specifies input measurement or parameter value.
-- `--primary`: Specifies input measurement or parameter value.
-- `--secondary`: Specifies input measurement or parameter value.
-- `--critical`: Specifies input measurement or parameter value.
-- `--status`: Specifies input measurement or parameter value.
-- `--input`: Specifies input measurement or parameter value.
-- `--output`: Specifies input measurement or parameter value.
+The server serves the same browser calculator at /docs/. POST /api/chemistry accepts JSON with fields named as in the browser form, for example:
 
-### Input Data Schema
+    curl -X POST http://127.0.0.1:8000/api/chemistry -H 'Content-Type: application/json' -d '{"intrinsic_solubility_mg_ml":0.5,"dose_mg":100,"permeability":"unknown"}'
 
-| Field | Description | Requirement |
-|:------|:------------|:------------|
-| `task_id` | Parameter / observation metric | Required |
-| `target_identifier` | Parameter / observation metric | Required |
-| `primary_metric` | Parameter / observation metric | Required |
-| `secondary_metric` | Parameter / observation metric | Required |
-| `is_critical_flag` | Parameter / observation metric | Required |
-| `status_descriptor` | Parameter / observation metric | Required |
+The legacy service endpoints are /api/audit, /api/chat, /api/audit/logs, /health and JSON /metrics. For legacy CLI compatibility:
 
----
+    python cli.py audit --primary 29.4 --secondary 14.8
+    python cli.py batch -i sample.csv -o results.csv
+    python cli.py verify-audit
+    python -m solubility_mind.cli audit
 
-## 🛡️ Security & Enterprise Architecture
+The installed solubility-dissolution-kows-agent command runs the solubility_mind legacy CLI. Neither legacy task workflow produces a validated BCS classification.
 
-* **Zero-PHI Outbound Interceptor:** Active AST and regex inspection blocking SSNs, MRNs, phone numbers, and patient identifiers.
-* **Tamper-Evident HMAC-SHA256 Audit Trail:** Chained, cryptographically signed logs for every evaluation and state transition. Set `AUDIT_SECRET_KEY` env var for persistent signatures across restarts; a secure random key is generated automatically if unset.
-* **Path Traversal Protection:** All batch CLI file I/O is restricted to the working directory, preventing directory traversal attacks.
-* **Robust Error Handling:** Batch processing gracefully handles malformed CSV rows, missing files, and invalid numeric data without crashing.
-* **Air-Gapped LLM Reasoning Adapter:** Agnostic integration for local Ollama instances (`llama3`, `mistral`), Claude 3.5 Sonnet, GPT-4o, and deterministic test mocks.
-* **Active Learning Bayesian Calibration:** Dynamic tracker updating worker reliability weights and monitoring Brier calibration drift.
-* **FastAPI & Prometheus Telemetry:** Exposes OpenAPI 3.1 REST endpoints and operational Prometheus metrics (`/metrics`).
+## Scientific limitations
 
-### Environment Variables
+**Screening only, not a regulatory BCS determination.** ICH M9 requires experimental equilibrium solubility over the relevant pH range at 37 ± 1 °C, using the highest single therapeutic dose in 250 mL or less, and separately justified permeability evidence. The model here provides theoretical monoprotic pH profiles, not experimental measurements. It omits activity coefficients, salts, complex ionization, polymorphism, solubility in actual biorelevant media, temperature, kinetic precipitation, and human pharmacokinetics.
 
-| Variable | Required | Default | Purpose |
-|:---------|:---------|:--------|:--------|
-| `AUDIT_SECRET_KEY` | No (recommended) | Random per-session | Secret key for HMAC-SHA256 audit signatures. Set for production to ensure signature consistency across restarts. |
-| `MODEL_PROVIDER` | No | `mock` | LLM provider: `mock`, `ollama`, `claude`, `openai` |
+Permeability evidence must be supplied externally. The provisional BCS quadrant is therefore an illustrative screening combination, not a biowaiver eligibility decision. Do not use the result for therapeutic decisions, regulated release, or clinical recommendations.
 
----
+Scientific reference: [ICH M9 guideline](https://database.ich.org/sites/default/files/M9_Guideline_Step4_2019_1116.pdf).
 
-## 🧪 Testing & Verification
+## Privacy, security and technology
 
-Run the automated test suite:
+The static browser app performs calculations entirely on-device and sends no input data to any service. It has no analytics or user accounts. It uses dependency-free ES modules; Pyodide is unnecessary because the models are lightweight and can execute faster in native JavaScript. Suitable for current Chromium, Firefox and Safari browsers.
 
-```bash
-pytest -v
-```
+The optional legacy Python API stores dossiers and the audit chain in process memory. HMAC-SHA256 signatures protect logged metadata against modification while the secret remains protected; the log does not persist across restarts. If AUDIT_SECRET_KEY is omitted, an ephemeral random key is used. Existing regex-based identifier checks are limited and are not a substitute for de-identification. Do not submit patient-identifiable data to the legacy API.
 
-Execute high-throughput batch simulation benchmarks:
+For local Docker usage:
 
-```bash
-python simulator.py --tasks 1000 --concurrency 8
-```
+    docker build -t solubility-dissolution-kows-agent .
+    docker run -p 8000:8000 solubility-dissolution-kows-agent
 
----
+Docker Compose allows an optional AUDIT_SECRET_KEY; there is no fixed default signing key.
 
-## 🐳 Container Deployment
-
-```bash
-docker build -t solubility-dissolution-kows-agent .
-docker run -p 8000:8000 solubility-dissolution-kows-agent
-```
+License: [MIT](LICENSE).

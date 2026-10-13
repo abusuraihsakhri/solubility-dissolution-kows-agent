@@ -1,5 +1,5 @@
 """
-Inference Engine supporting local Ollama, Claude, OpenAI, and deterministic Mock with Zero-PHI checks.
+Local deterministic mock adapter with regex-based identifier interception.
 """
 from .base import PHIGuard
 
@@ -14,7 +14,7 @@ class MockLLM:
 
 
 class LLMFactory:
-    """Creates configured LLM client instances with zero-PHI protection."""
+    """Only mock/test mode is implemented; other providers are explicitly rejected."""
 
     @staticmethod
     def create(provider: str = "mock", system_name: str = "Solubility Dissolution Kows Agent"):

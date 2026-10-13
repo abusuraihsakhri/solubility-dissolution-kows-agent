@@ -32,7 +32,10 @@ jobs:
         pytest -v
 
     - name: Browser chemistry checks
-      run: node --test tests/test_browser.mjs
+      run: |
+        node --check docs/chemistry.mjs
+        node --check docs/app.mjs
+        node --test tests/test_browser.mjs
 
     - name: Audit integrity smoke test
       run: |

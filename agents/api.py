@@ -16,7 +16,7 @@ supervisor = SystemSupervisor(model_provider="mock")
 
 app = FastAPI(
     title="Solubility Dissolution Kows Agent API",
-    description="Enterprise Distributed Component Platform (AI Drug Discovery, Structural Biology & Wet-Lab Robotics)",
+    description="Legacy generic audit API and separate physicochemical screening calculations",
     version="3.0.0-ENTERPRISE",
 )
 

@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "solubility-dissolution-kows-agent"
 version = "2.1.0"
-description = "SolubilityMind: Aqueous Equilibrium Solubility & BCS Biopharmaceutics Engine"
+description = "Experimental physicochemical screening calculator with legacy task audit tools"
 readme = "README.md"
 authors = [{ name = "Dr. Abu Suraih Sakhri", email = "abusuraih@example.com" }]
 license = { text = "MIT" }
@@ -14,13 +14,12 @@ classifiers = [
     "License :: OSI Approved :: MIT License",
     "Operating System :: OS Independent",
     "Topic :: Scientific/Engineering :: Chemistry",
-    "Topic :: Scientific/Engineering :: Artificial Intelligence",
 ]
 requires-python = ">=3.9"
 dependencies = ["pydantic>=2,<3", "fastapi>=0.110,<1", "uvicorn>=0.29,<1"]
 
 [project.scripts]
-solubility-dissolution-kows-engine = "solubility_mind.cli:main"
+solubility-dissolution-kows-agent = "solubility_mind.cli:main"
 
 [project.urls]
 Homepage = "https://github.com/abusuraihsakhri/solubility-dissolution-kows-agent"
