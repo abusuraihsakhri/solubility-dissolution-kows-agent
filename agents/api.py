@@ -2,6 +2,11 @@
 FastAPI REST API Server for Solubility Dissolution Kows Agent.
 """
 from fastapi import FastAPI, HTTPException
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import RedirectResponse
+from pathlib import Path
+from typing import Optional, Literal
+from .chemistry_api import ChemistryRequest
 from pydantic import BaseModel
 from .base import AuditLogger, PHIGuard
 from .models import SystemTaskPayload
@@ -52,3 +57,22 @@ def api_chat(req: ChatRequest):
 @app.get("/api/audit/logs")
 def api_audit_logs():
     return {"audit_trail": AuditLogger.get_trail(), "verified": AuditLogger.verify_integrity()}
+
+
+_DOCS = Path(__file__).resolve().parents[1] / "docs"
+if _DOCS.is_dir():
+    app.mount("/docs", StaticFiles(directory=str(_DOCS), html=True), name="calculator")
+
+
+@app.get("/", include_in_schema=False)
+def home():
+    return RedirectResponse(url="/docs/")
+
+
+@app.post("/api/chemistry")
+def chemistry_analysis(req: ChemistryRequest):
+    from solubility_mind.chemistry import calculate
+    try:
+        return calculate(**req.model_dump())
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
