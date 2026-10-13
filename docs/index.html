@@ -64,7 +64,7 @@ footer{margin-top:1.5rem;color:var(--muted);font-size:.86rem}
 <div class="field" id="pka-group" hidden><label for="pka">pKa</label><input id="pka" name="pka" type="number" step="any" value="4.5"><small>Required for acids and bases</small></div>
 <div class="field"><label for="perm">Independent permeability evidence</label><select id="perm" name="permeability"><option value="unknown">Unknown / not assessed</option><option value="high">High (externally established)</option><option value="low">Low (externally established)</option></select></div>
 </div>
-<h3>Optional log K<sub>ow</sub></h3>
+<h3>Optional octanol/water concentration ratio</h3>
 <div class="fields">
 <div class="field"><label for="co">Octanol equilibrium concentration (mg/mL)</label><input id="co" name="octanol_concentration_mg_ml" type="number" min="0" step="any" placeholder="Optional"></div>
 <div class="field"><label for="cw">Water equilibrium concentration (mg/mL)</label><input id="cw" name="water_concentration_mg_ml" type="number" min="0" step="any" placeholder="Optional"></div>
@@ -75,6 +75,7 @@ footer{margin-top:1.5rem;color:var(--muted);font-size:.86rem}
 <div class="field"><label for="area">Surface area A (cm²)</label><input id="area" name="surface_area_cm2" type="number" min="0" step="any" placeholder="Optional"></div>
 <div class="field"><label for="layer">Diffusion-layer thickness h (cm)</label><input id="layer" name="diffusion_layer_cm" type="number" min="0" step="any" placeholder="Optional"></div>
 <div class="field"><label for="bulk">Bulk concentration C (mg/mL)</label><input id="bulk" name="bulk_concentration_mg_ml" type="number" min="0" step="any" placeholder="Optional"></div>
+<div class="field"><label for="cs">Saturation concentration Cₛ in dissolution medium (mg/mL)</label><input id="cs" name="saturation_concentration_mg_ml" type="number" min="0" step="any" placeholder="Optional"></div>
 </div>
 <div class="actions"><button type="submit">Calculate</button><button type="button" id="export" class="secondary" disabled>Export CSV</button></div>
 </form><div id="error" class="error" role="alert" hidden></div>
@@ -86,10 +87,10 @@ footer{margin-top:1.5rem;color:var(--muted);font-size:.86rem}
 <div class="metric"><span>Dose number</span><strong id="dose-result"></strong></div>
 <div class="metric"><span>Provisional BCS quadrant</span><strong id="bcs-result"></strong></div>
 <div class="metric"><span>Minimum modeled solubility</span><strong id="min-result"></strong></div>
-<div class="metric"><span>log K<sub>ow</sub></span><strong id="kow-result"></strong></div>
+<div class="metric"><span>log₁₀(C<sub>octanol</sub>/C<sub>water</sub>)</span><strong id="kow-result"></strong></div>
 <div class="metric"><span>Dissolution rate (negative = net precipitation)</span><strong id="rate-result"></strong></div>
 <h3>Modeled pH profile</h3><table><thead><tr><th scope="col">pH</th><th scope="col">Solubility (mg/mL)</th></tr></thead><tbody id="ph-data"></tbody></table>
-<p class="result-note">S(pH) = S₀[1 + 10^(pH − pKa)] for a weak acid, or S₀[1 + 10^(pKa − pH)] for a weak base. Dissolution rate dM/dt = (DA/h)(Cₛ − C). Assumes ideal behavior and neglects salts, activity, crystallinity and temperature.</p>
+<p class="result-note">S(pH) = S₀[1 + 10^(pH − pKa)] for a weak acid, or S₀[1 + 10^(pKa − pH)] for a weak base. Dissolution rate dM/dt = (DA/h)(Cₛ − C). Assumes ideal behavior and neglects salts, activity, crystallinity and temperature. The phase concentration ratio represents intrinsic log Kow only for the appropriate neutral-species partitioning experiment.</p>
 </div>
 <p id="empty" class="muted">Select Calculate to see results. No values have been computed yet.</p>
 </section>

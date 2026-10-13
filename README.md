@@ -7,8 +7,8 @@ A browser-based and Python physicochemical calculator for exploratory pharmaceut
 - Idealized pH-dependent solubility at pH 1.2, 4.5, and 6.8 for monoprotic weak acids, weak bases, and neutral solutes.
 - Dose number from the highest single dose, 250 mL and minimum modeled solubility.
 - Provisional BCS quadrant I–IV only when independent high/low permeability evidence is supplied. Log Kow is never used to infer permeability.
-- Optional octanol/water distribution log ratio from measured equilibrium concentrations.
-- Optional instantaneous Noyes–Whitney dissolution rate from diffusion coefficient, area, boundary-layer thickness, and bulk concentration.
+- Optional log10 octanol/water concentration ratio from measured equilibrium concentrations (not necessarily intrinsic log Kow for ionizable solutes).
+- Optional instantaneous Noyes–Whitney dissolution rate from diffusion coefficient, area, boundary-layer thickness, and independently supplied bulk and saturation concentrations in the dissolution medium.
 - CSV export and equivalent Python calculations exposed through FastAPI.
 - The earlier generic task-audit APIs and CLIs remain available for compatibility, but their fixed thresholds are not physicochemical BCS criteria.
 
@@ -20,7 +20,7 @@ Serve the repository root using:
 
 Then open http://localhost:8080/docs/ in a modern browser. The alternative top-level index.html redirects to the calculator. An HTTP server is recommended because some browsers restrict JavaScript modules on file:// URLs.
 
-Enter intrinsic solubility (mg/mL) and highest single dose (mg). Choose ionization and enter pKa for monoprotic weak acids/bases. Optional octanol/water and dissolution fields can be left empty or entered as complete groups. Select Calculate, then Export CSV.
+Enter intrinsic solubility (mg/mL) and highest single dose (mg). Choose ionization and enter pKa for monoprotic weak acids/bases. Optional octanol/water and dissolution fields can be left empty or entered as complete groups. Dissolution Cs and Cb must refer to the same medium. Select Calculate, then Export CSV.
 
 GitHub Pages can deploy the docs directory through the included GitHub Actions workflow when repository Pages settings use GitHub Actions as the source.
 

@@ -29,7 +29,8 @@ def test_partition_and_noyes_whitney():
                        diffusion_cm2_s=1e-5,
                        surface_area_cm2=10,
                        diffusion_layer_cm=0.01,
-                       bulk_concentration_mg_ml=0.5)
+                       bulk_concentration_mg_ml=0.5,
+                       saturation_concentration_mg_ml=2.0)
     assert result["log_kow"] == pytest.approx(1)
     assert result["dissolution_rate_mg_s"] == pytest.approx(0.015)
 

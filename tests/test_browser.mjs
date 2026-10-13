@@ -16,7 +16,8 @@ test("weak acid/base profile",()=>{
 test("partition and dissolution",()=>{
   const d=calculate({intrinsic_solubility_mg_ml:2,dose_mg:100,octanol_concentration_mg_ml:10,
     water_concentration_mg_ml:1,diffusion_cm2_s:1e-5,surface_area_cm2:10,
-    diffusion_layer_cm:0.01,bulk_concentration_mg_ml:0.5});
+    diffusion_layer_cm:0.01,bulk_concentration_mg_ml:0.5,
+    saturation_concentration_mg_ml:2.0});
   approx(d.log_kow,1);approx(d.dissolution_rate_mg_s,0.015);
 });
 test("invalid data",()=>{

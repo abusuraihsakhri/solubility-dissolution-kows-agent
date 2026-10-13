@@ -28,6 +28,7 @@ def calculate(
     surface_area_cm2: Optional[float] = None,
     diffusion_layer_cm: Optional[float] = None,
     bulk_concentration_mg_ml: Optional[float] = None,
+    saturation_concentration_mg_ml: Optional[float] = None,
 ):
     """Calculate idealized Henderson–Hasselbalch, dose-number, partition and Noyes–Whitney quantities.
 
@@ -79,17 +80,18 @@ def calculate(
         log_kow = math.log10(co) - math.log10(cw)
 
     optional_dissolution = (diffusion_cm2_s, surface_area_cm2, diffusion_layer_cm,
-                            bulk_concentration_mg_ml)
+                            bulk_concentration_mg_ml, saturation_concentration_mg_ml)
     if any(x is not None for x in optional_dissolution) and not all(x is not None for x in optional_dissolution):
-        raise ValueError("Dissolution rate requires D, area, layer thickness, and bulk concentration")
+        raise ValueError("Dissolution rate requires D, area, layer thickness, bulk and surface saturation concentrations")
     dissolution_rate = None
     if all(x is not None for x in optional_dissolution):
         d = _number("diffusion_cm2_s", diffusion_cm2_s, nonnegative=True)
         area = _number("surface_area_cm2", surface_area_cm2, positive=True)
         h = _number("diffusion_layer_cm", diffusion_layer_cm, positive=True)
         cb = _number("bulk_concentration_mg_ml", bulk_concentration_mg_ml, nonnegative=True)
-        # 1 mL = 1 cm^3; this rate has units mg/s.
-        dissolution_rate = d * area / h * (minimum_s - cb)
+        cs = _number("saturation_concentration_mg_ml", saturation_concentration_mg_ml, positive=True)
+        # 1 mL = 1 cm^3; Cs and Cb are supplied for the same dissolution medium.
+        dissolution_rate = d * area / h * (cs - cb)
         if not math.isfinite(dissolution_rate):
             raise ValueError("Dissolution rate is outside the numeric range")
 

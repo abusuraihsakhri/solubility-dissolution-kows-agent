@@ -10,7 +10,8 @@ export function calculate({
   ionization = "neutral", pka = null, permeability = "unknown",
   octanol_concentration_mg_ml: co = null, water_concentration_mg_ml: cw = null,
   diffusion_cm2_s: d = null, surface_area_cm2: area = null,
-  diffusion_layer_cm: layer = null, bulk_concentration_mg_ml: bulk = null
+  diffusion_layer_cm: layer = null, bulk_concentration_mg_ml: bulk = null,
+  saturation_concentration_mg_ml: cs = null
 }) {
   check("Intrinsic solubility", sol, {positive:true});
   check("Dose", dose, {positive:true});
@@ -44,13 +45,14 @@ export function calculate({
     log_kow = Math.log10(co) - Math.log10(cw);
   }
   let dissolution_rate_mg_s = null;
-  if ([d,area,layer,bulk].some(x => x !== null)) {
+  if ([d,area,layer,bulk,cs].some(x => x !== null)) {
     if ([d,area,layer,bulk].some(x => x === null)) throw new Error("All four dissolution fields are required");
     check("Diffusion coefficient", d, {nonnegative:true});
     check("Surface area", area, {positive:true});
     check("Diffusion-layer thickness", layer, {positive:true});
     check("Bulk concentration", bulk, {nonnegative:true});
-    dissolution_rate_mg_s = d * area / layer * (minimum_solubility_mg_ml - bulk);
+    check("Surface saturation concentration", cs, {positive:true});
+    dissolution_rate_mg_s = d * area / layer * (cs - bulk);
     if (!Number.isFinite(dissolution_rate_mg_s)) throw new Error("Dissolution rate is outside the numeric range");
   }
   return {

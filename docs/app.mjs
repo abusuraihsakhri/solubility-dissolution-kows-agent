@@ -25,7 +25,8 @@ function inputs() {
     diffusion_cm2_s:number("diffusion_cm2_s"),
     surface_area_cm2:number("surface_area_cm2"),
     diffusion_layer_cm:number("diffusion_layer_cm"),
-    bulk_concentration_mg_ml:number("bulk_concentration_mg_ml")
+    bulk_concentration_mg_ml:number("bulk_concentration_mg_ml"),
+    saturation_concentration_mg_ml:number("saturation_concentration_mg_ml")
   };
 }
 function updateIonization() {

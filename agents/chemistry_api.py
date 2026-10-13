@@ -15,3 +15,4 @@ class ChemistryRequest(BaseModel):
     surface_area_cm2: Optional[float] = Field(default=None, gt=0, allow_inf_nan=False)
     diffusion_layer_cm: Optional[float] = Field(default=None, gt=0, allow_inf_nan=False)
     bulk_concentration_mg_ml: Optional[float] = Field(default=None, ge=0, allow_inf_nan=False)
+    saturation_concentration_mg_ml: Optional[float] = Field(default=None, gt=0, allow_inf_nan=False)
